@@ -1,6 +1,31 @@
 import streamlit as st
 import pandas as pd
 import duckdb
+import io
+
+csv = '''
+beverage, price
+orange juice, 2.5
+Expresso, 2
+Tea, 3
+'''
+beverages = pd.read_csv(io.StringIO(csv))
+
+csv2 = '''
+food item, food price
+cookie juice, 2.5
+chocolatine, 2
+muffin, 3
+'''
+food_items = pd.read_csv(io.StringIO(csv2))
+
+answer = """
+SELECT * FROM beverages
+CROSS JOIN food_items
+"""
+
+solution = duckdb.query(answer).df()
+
 
 st.write("""
 # SQL SRS
@@ -15,10 +40,23 @@ option = st.selectbox(
 )
 st.write("You are studying", option)
 
-data = {"a" : [1,2,3], "b" : [4,5,6]}
-df = pd.DataFrame(data)
 
 sql_query = st.text_area("Enter your query here")
-st.write(f"Query: {sql_query}")
+if sql_query:
+    st.write(f"Query: {sql_query}")
+    st.dataframe(duckdb.query(sql_query).df())
 
-st.dataframe(duckdb.query(sql_query).df())
+tab1, tab2 = st.tabs(["Tables", "Solutions"])
+
+with tab1:
+    st.write("beverages")
+    st.dataframe(beverages)
+    st.write("food items")
+    st.dataframe(food_items)
+    st.write("Expected")
+    st.dataframe(solution)
+
+with tab2:
+    st.write("""
+             SELECT * FROM beverages \n
+CROSS JOIN food_items""")
