@@ -26,10 +26,19 @@ CROSS JOIN food_items
 
 solution = duckdb.query(answer).df()
 
+
 st.write("""
 # SQL SRS
 Spaced Repetition System SQL practice
 """)
+
+option = st.selectbox(
+    "What do you want to study?",
+    ["Joins", "Window functions", "GroupBy"],
+    index=None,
+    placeholder="Select your subject"
+)
+st.write("You are studying", option)
 
 
 sql_query = st.text_area("Enter your query here")
