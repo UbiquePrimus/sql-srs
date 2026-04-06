@@ -1,31 +1,10 @@
-import io
-
 import duckdb
-import pandas as pd
 import streamlit as st
 
-csv = """
-beverage, price
-orange juice, 2.5
-Expresso, 2
-Tea, 3
-"""
-beverages = pd.read_csv(io.StringIO(csv))
 
-csv2 = """
-food item, food price
-cookie juice, 2.5
-chocolatine, 2
-muffin, 3
-"""
-food_items = pd.read_csv(io.StringIO(csv2))
+con = duckdb.connect("data/exercices_sql_tables.duckdb", read_only=False)
 
-answer_str = """
-SELECT * FROM beverages
-CROSS JOIN food_items
-"""
-
-solution_df = duckdb.query(answer_str).df()
+#solution_df = duckdb.query(answer_str).df()
 
 
 st.write("""
@@ -34,44 +13,47 @@ Spaced Repetition System SQL practice
 """)
 
 with st.sidebar:
-    option = st.selectbox(
+    theme = st.selectbox(
         "What do you want to study?",
-        ["Joins", "Window functions", "GroupBy"],
+        ["cross_joins", "Window functions", "GroupBy"],
         index=None,
         placeholder="Select your subject",
     )
-    st.write("You are studying", option)
+    st.write("You are studying", theme)
+
+    exercise = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    st.write(exercise)
 
 
 sql_query = st.text_area("Enter your query here")
-if sql_query:
-    st.write(f"Query: {sql_query}")
-    result = duckdb.query(sql_query).df()
-    st.dataframe(result)
-
-    if len(result.columns) != len(solution_df.columns):
-        st.write("The columns don't match")
-
-    try:
-        result = result[solution_df.columns]
-        st.dataframe(result.compare(solution_df))
-    except KeyError as e:
-        st.write("The columns don't match")
-
-    if result.shape[0] != solution_df.shape[0]:
-        st.write("The rows don't match")
-
-tab1, tab2 = st.tabs(["Tables", "Solutions"])
-
-with tab1:
-    st.write("beverages")
-    st.dataframe(beverages)
-    st.write("food items")
-    st.dataframe(food_items)
-    st.write("Expected")
-    st.dataframe(solution_df)
-
-with tab2:
-    st.write("""
-             SELECT * FROM beverages \n
-CROSS JOIN food_items""")
+#if sql_query:
+#    st.write(f"Query: {sql_query}")
+#    result = duckdb.query(sql_query).df()
+#    st.dataframe(result)
+#
+#    if len(result.columns) != len(solution_df.columns):
+#        st.write("The columns don't match")
+#
+#    try:
+#        result = result[solution_df.columns]
+#        st.dataframe(result.compare(solution_df))
+#    except KeyError as e:
+#        st.write("The columns don't match")
+#
+#    if result.shape[0] != solution_df.shape[0]:
+#        st.write("The rows don't match")
+#
+#tab1, tab2 = st.tabs(["Tables", "Solutions"])
+#
+#with tab1:
+#    st.write("beverages")
+#    st.dataframe(beverages)
+#    st.write("food items")
+#    st.dataframe(food_items)
+#    st.write("Expected")
+#    st.dataframe(solution_df)
+#
+#with tab2:
+#    st.write("""
+#             SELECT * FROM beverages \n
+#CROSS JOIN food_items""")
