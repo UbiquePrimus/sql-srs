@@ -25,10 +25,26 @@ with st.sidebar:
     exercise = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
     st.write(exercise)
 
+exercise_name = exercise.loc[0,"exercise_name"]
+sql_solution = f"answers/{exercise_name}.sql"
+with open(sql_solution, "r") as f:
+    answer = f.read()
+
+solution_df = con.execute(answer).df()
+
 sql_query = st.text_area("Enter your query here")
 if sql_query:
     result = con.execute(sql_query).df()
     st.dataframe(result)
+
+    try:
+        result = result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except KeyError as e:
+        st.write("The columns don't match")
+
+    if result.shape[0] != solution_df.shape[0]:
+        st.write("The rows don't match")
 
 #if sql_query:
 #    st.write(f"Query: {sql_query}")
@@ -58,8 +74,5 @@ with tab1:
 
 
 with tab2:
-    exercise_name = exercise.loc[0,"exercise_name"]
-    sql_solution = f"answers/{exercise_name}.sql"
-    with open(sql_solution, "r") as f:
-        st.code(f.read(), language="sql")
+    st.code(answer, language="sql")
 
