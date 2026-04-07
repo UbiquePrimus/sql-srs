@@ -1,5 +1,6 @@
 import duckdb
 import streamlit as st
+import ast
 
 
 con = duckdb.connect("data/exercices_sql_tables.duckdb", read_only=False)
@@ -24,8 +25,11 @@ with st.sidebar:
     exercise = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
     st.write(exercise)
 
-
 sql_query = st.text_area("Enter your query here")
+if sql_query:
+    result = con.execute(sql_query).df()
+    st.dataframe(result)
+
 #if sql_query:
 #    st.write(f"Query: {sql_query}")
 #    result = duckdb.query(sql_query).df()
@@ -43,17 +47,19 @@ sql_query = st.text_area("Enter your query here")
 #    if result.shape[0] != solution_df.shape[0]:
 #        st.write("The rows don't match")
 #
-#tab1, tab2 = st.tabs(["Tables", "Solutions"])
-#
-#with tab1:
-#    st.write("beverages")
-#    st.dataframe(beverages)
-#    st.write("food items")
-#    st.dataframe(food_items)
-#    st.write("Expected")
-#    st.dataframe(solution_df)
-#
-#with tab2:
-#    st.write("""
-#             SELECT * FROM beverages \n
-#CROSS JOIN food_items""")
+tab1, tab2 = st.tabs(["Tables", "Solutions"])
+
+with tab1:
+    exercise_tables = ast.literal_eval(exercise.loc[0,"tables"])
+    for table in exercise_tables:
+        st.write(f"table: {table}")
+        df_table = con.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(df_table)
+
+
+with tab2:
+    exercise_name = exercise.loc[0,"exercise_name"]
+    sql_solution = f"answers/{exercise_name}.sql"
+    with open(sql_solution, "r") as f:
+        st.code(f.read(), language="sql")
+
