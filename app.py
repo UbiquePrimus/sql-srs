@@ -23,9 +23,10 @@ Spaced Repetition System SQL practice
 """)
 
 with st.sidebar:
+    available_themes = con.execute("SELECT DISTINCT theme FROM memory_state").df()
     theme = st.selectbox(
         "What do you want to study?",
-        ["cross_joins", "Window functions", "GroupBy"],
+        available_themes["theme"].unique(),
         index=None,
         placeholder="Select your subject",
     )
